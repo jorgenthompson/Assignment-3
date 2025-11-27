@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Superhero Laser Dodge</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Full viewport video background -->
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="assets/videos/background.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Dark overlay for readability -->
+  <div id="overlay">
+    <header>
+      <h1>Superhero Laser Dodge</h1>
+      <p class="tagline">
+        Move the hero up and down to dodge incoming lasers. Survive the full 60 seconds.
+      </p>
+    </header>
+
+    <main>
+      <section id="hud">
+        <div class="hud-item">
+          <span class="label">Score:</span>
+          <span id="score">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="label">Time:</span>
+          <span id="time">60</span>s
+        </div>
+        <div class="hud-item">
+          <button id="startBtn">Start</button>
+          <button id="resetBtn" disabled>Reset</button>
+        </div>
+        <p class="controls">
+          Controls: W / S or ↑ / ↓ to move.
+        </p>
+        <p id="message"></p>
+      </section>
+
+      <section id="game-area" aria-label="2D game area">
+        <!-- Movable hero on the left -->
+        <div id="hero"></div>
+
+        <!-- Spaceships on the right (fixed positions) -->
+        <div class="ship ship-top"></div>
+        <div class="ship ship-middle"></div>
+        <div class="ship ship-bottom"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Main artwork and content by the site author. Simple DOM-based game with HTML, CSS, and JavaScript.</p>
+    </footer>
+  </div>
+
+  <script src="java/script.js"></script>
+</body>
+</html>
