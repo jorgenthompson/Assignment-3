@@ -2,219 +2,261 @@
 *,
 *::before,
 *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html,
 body {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #f9fafb;
-  overflow: hidden; /* prevent scrolling */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f9fafb;
+    overflow: hidden;
+    /* prevent scrolling */
 }
 
 /* Full viewport background video */
 #bg-video {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -2;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
 }
 
 /* Dark overlay for content */
 #overlay {
-  position: relative;
-  min-height: 100vh;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.4); /* slightly darken the video */
-  display: flex;
-  flex-direction: column;
+    position: relative;
+    min-height: 100vh;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    /* slightly darken the video */
+    display: flex;
+    flex-direction: column;
 }
+
+.no-overlay {
+    background: transparent !important;
+}
+
+/* Game area */
+#game-area {
+    position: relative;
+    margin: 0.5rem auto 0;
+    width: min(900px, 100%);
+    height: 70vh;          /* 👈 this matters for hero size & movement */
+    border-radius: 1rem;
+    border: 2px solid rgba(148, 163, 184, 0.788);
+    background: transparent; /* no rectangle fill */
+    overflow: hidden;
+}
+
+
+
+
 
 /* Header */
 header {
-  text-align: center;
-  margin-bottom: 0.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
 }
 
 header h1 {
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .tagline {
-  font-size: 0.9rem;
-  color: #e5e7eb;
-  margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #e5e7eb;
+    margin-top: 0.25rem;
 }
 
 /* Layout */
 main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 /* HUD */
 #hud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .hud-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: rgba(15, 23, 42, 0.7);
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.7);
 }
 
 .label {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .controls {
-  font-size: 0.85rem;
-  color: #e5e7eb;
+    font-size: 0.85rem;
+    color: #e5e7eb;
 }
 
 #message {
-  width: 100%;
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
-  color: #e5e7eb;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #e5e7eb;
 }
 
 /* Buttons */
 button {
-  padding: 0.3rem 0.9rem;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.9rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
 }
 
 #startBtn {
-  background: #22c55e;
-  color: #022c22;
-  font-weight: 600;
+    background: #22c55e;
+    color: #022c22;
+    font-weight: 600;
 }
 
 #startBtn:disabled {
-  opacity: 0.6;
-  cursor: default;
+    opacity: 0.6;
+    cursor: default;
 }
 
 #resetBtn {
-  background: #0f172a;
-  color: #e5e7eb;
-  border: 1px solid #64748b;
+    background: #0f172a;
+    color: #e5e7eb;
+    border: 1px solid #64748b;
 }
 
 #resetBtn:disabled {
-  opacity: 0.4;
-  cursor: default;
+    opacity: 0.4;
+    cursor: default;
 }
 
 /* Hero and ships share some styles */
 #hero,
 .ship {
-  position: absolute;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
+    position: absolute;
 }
 
-/* Hero on the left */
+/* Hero positioning */
 #hero {
-  width: 12%;
-  aspect-ratio: 3 / 4;
-  left: 5%;
-  top: 50%;           /* JS will adjust this, but this is the starting point */
-  transform: translateY(-50%);
-  background-image: url("superhero.svg");
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
+    display: inline-block;
+    height: auto;
+    width: 50%;
+    left: -10%;
+    top: 0%;
 }
 
-/* Ships on the right */
+#hero .hitbox {
+    position: absolute;
+    width: 10%;
+    height: 10%;
+    top: 40%;
+    left: 50%;
+    right: 50%;
+    pointer-events: none;
+    border: #02ffc4 2px solid;
+  }
+  
+
+/* Ships */
 .ship {
-  width: 18%;
-  aspect-ratio: 3 / 2;
-  right: 5%;
-  filter: drop-shadow(-3px 0 10px rgba(59, 130, 246, 0.8));
+    width: 18%;
+    right: 5%;
 }
 
 .ship-top {
-  top: 15%;
-  background-image: url("spaceship_blue.svg");
+    top: 5%;
 }
 
 .ship-middle {
-  top: 50%;
-  transform: translateY(-50%);
-  background-image: url("spaceship_green.svg");
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .ship-bottom {
-  bottom: 15%;
-  background-image: url("spaceship_red.svg");
+    bottom: 5%;
 }
+
+/* Make the <img> fill their parent boxes */
+#hero img,
+.ship img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8));
+}
+
 
 /* Lasers */
 .laser {
-  position: absolute;
-  width: 12%;
-  aspect-ratio: 5 / 1;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  filter: drop-shadow(0 0 8px rgba(248, 250, 252, 0.9));
+    position: absolute;
+    height: 30%;           /* laser thickness relative to game area height */
+    width: auto;           /* keep aspect ratio from the SVG */
+    display: block;
+    filter: drop-shadow(0 0 12px rgba(248, 250, 252, 0.9));
 }
+
+
 
 /* Slight color link to ship rows */
 .laser-blue {
-  background-image: url("laser_blue.svg");
+    background-image: url("laser_blue.svg");
 }
 
 .laser-green {
-  background-image: url("laser_green.svg");
+    background-image: url("laser_green.svg");
 }
 
 .laser-red {
-  background-image: url("laser_red.svg");
+    background-image: url("laser_red.svg");
 }
 
 /* Simple "hit" feedback */
 #hero.hit {
-  animation: blink 0.2s linear 2;
+    animation: blink 0.2s linear 2;
 }
 
 @keyframes blink {
-  0%   { opacity: 1; }
-  50%  { opacity: 0.2; }
-  100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 /* Footer */
 footer {
-  text-align: center;
-  font-size: 0.75rem;
-  color: #d1d5db;
-  margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    margin-top: 0.5rem;
 }

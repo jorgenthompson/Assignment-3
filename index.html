@@ -43,14 +43,22 @@
       </section>
 
       <section id="game-area" aria-label="2D game area">
-        <!-- Movable hero on the left -->
-        <div id="hero"></div>
-
-        <!-- Spaceships on the right (fixed positions) -->
-        <div class="ship ship-top"></div>
-        <div class="ship ship-middle"></div>
-        <div class="ship ship-bottom"></div>
+        <div id="hero">
+          <img id="hero-img" src="assets/images/superhero.svg" alt="Superhero" />
+          <div class="hitbox"></div>
+        </div>
+      
+        <div class="ship ship-top">
+          <img src="assets/images/spaceship_blue.svg" alt="Blue ship" />
+        </div>
+        <div class="ship ship-middle">
+          <img src="assets/images/spaceship_green.svg" alt="Green ship" />
+        </div>
+        <div class="ship ship-bottom">
+          <img src="assets/images/spaceship_red.svg" alt="Red ship" />
+        </div>
       </section>
+      
     </main>
 
     <footer>
