@@ -1,4 +1,4 @@
-/* Reset-ish */
+/* Reset */
 *,
 *::before,
 *::after {
@@ -13,13 +13,13 @@ body {
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow: 1px 1px #00000060;
     color: #f9fafb;
     overflow: hidden;
-    /* prevent scrolling */
 }
 
-/* Full viewport background video */
+/* Background video */
 #bg-video {
     position: fixed;
     inset: 0;
@@ -29,13 +29,12 @@ body {
     z-index: -2;
 }
 
-/* Dark overlay for content */
+/* Overlay */
 #overlay {
     position: relative;
     min-height: 100vh;
     padding: 1rem;
     background: rgba(0, 0, 0, 0.4);
-    /* slightly darken the video */
     display: flex;
     flex-direction: column;
 }
@@ -47,14 +46,16 @@ body {
 /* Game area */
 #game-area {
     position: relative;
-    margin: 0.5rem auto 0;
-    width: min(900px, 100%);
-    height: 70vh;          /* 👈 this matters for hero size & movement */
-    border-radius: 1rem;
-    border: 2px solid rgba(148, 163, 184, 0.788);
-    background: transparent; /* no rectangle fill */
-    overflow: hidden;
+    margin: 0.5rem 0 0;
+
+    width: 100vw;
+    height: clamp(260px, 70vh, 900px);
+    background: transparent;
+    overflow: visible;
 }
+
+
+
 
 
 
@@ -67,6 +68,9 @@ header {
 }
 
 header h1 {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-style: oblique;
+    text-shadow: 1px 1px 0 #000000;
     font-size: clamp(1.8rem, 4vw, 2.4rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -154,37 +158,43 @@ button {
     cursor: default;
 }
 
-/* Hero and ships share some styles */
+/* HERO CONTAINER: positioned relative to #game-area */
 #hero,
 .ship {
     position: absolute;
 }
 
-/* Hero positioning */
 #hero {
+    position: absolute;
     display: inline-block;
-    height: auto;
-    width: 50%;
-    left: -10%;
-    top: 0%;
+
+    width: clamp(50px, 30%, 220px);
+    left: 0%;
 }
 
+/* HITBOX */
 #hero .hitbox {
     position: absolute;
-    width: 10%;
-    height: 10%;
-    top: 40%;
-    left: 50%;
-    right: 50%;
+    width: 30%;
+    height: 20%;
+    top: 20%;
+    left: 57%;
+    transform: translate(-50%, -50%);
+    rotate: -40deg;
     pointer-events: none;
-    border: #02ffc4 2px solid;
-  }
-  
+    /* border: #02ffc4 2px solid;  */
+}
+
+
+
 
 /* Ships */
 .ship {
-    width: 18%;
-    right: 5%;
+    position: absolute;
+    right: 3%;
+
+    height: clamp(100px, 30%, 200px);
+    width: auto;                     
 }
 
 .ship-top {
@@ -200,41 +210,34 @@ button {
     bottom: 5%;
 }
 
+
+
 /* Make the <img> fill their parent boxes */
 #hero img,
 .ship img {
-    width: 100%;
-    height: auto;
+    height: 100%;
+    width: auto;
     display: block;
     filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8));
 }
 
 
+
 /* Lasers */
 .laser {
     position: absolute;
-    height: 30%;           /* laser thickness relative to game area height */
-    width: auto;           /* keep aspect ratio from the SVG */
+
+    /* width-based, but shrink on short screens */
+    width: clamp(20px, 10%, 60px);
+    height: auto;
+
     display: block;
     filter: drop-shadow(0 0 12px rgba(248, 250, 252, 0.9));
 }
 
 
 
-/* Slight color link to ship rows */
-.laser-blue {
-    background-image: url("laser_blue.svg");
-}
-
-.laser-green {
-    background-image: url("laser_green.svg");
-}
-
-.laser-red {
-    background-image: url("laser_red.svg");
-}
-
-/* Simple "hit" feedback */
+/* The the hero gets hit */
 #hero.hit {
     animation: blink 0.2s linear 2;
 }

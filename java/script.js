@@ -1,6 +1,3 @@
-// Simple 2D dodging game
-// Hero on the left moves up/down to dodge lasers from ships on the right.
-
 const overlay = document.getElementById("overlay");
 const gameArea = document.getElementById("game-area");
 const heroEl = document.getElementById("hero");
@@ -11,6 +8,8 @@ const messageEl = document.getElementById("message");
 const startBtn = document.getElementById("startBtn");
 const resetBtn = document.getElementById("resetBtn");
 
+const bgVideo = document.getElementById("bg-video");
+
 const shipTop = document.querySelector(".ship-top");
 const shipMiddle = document.querySelector(".ship-middle");
 const shipBottom = document.querySelector(".ship-bottom");
@@ -20,12 +19,19 @@ let frameId = null;
 let timerId = null;
 let spawnId = null;
 
-let heroY = 0;              // current top position (px inside game area)
-let heroSpeed = 4;          // movement speed (px per frame)
-let lasers = [];            // { el, x, y }
-let laserSpeed = 6;         // px per frame
+let heroY = 0;              
+let heroSpeed = 4;             
+const baseHeroSpeed = 4;       
+const heroSpeedStep = 1.5;     
+let lasers = [];            
+let laserSpeed = 6;         
+const baseLaserSpeed = 6;   
+const laserSpeedStep = 2;  
+let spawnRate = 900;           
+const baseSpawnRate = 900;    
+const minSpawnRate = 250;     
 let score = 0;
-let timeLeft = 60;          // seconds
+let timeLeft = 60;         
 
 // For keyboard control
 const keys = {
@@ -42,7 +48,7 @@ function clamp(value, min, max) {
 function positionHeroCenter() {
   const areaRect = gameArea.getBoundingClientRect();
   const heroRect = heroEl.getBoundingClientRect();
-  heroY = (areaRect.height - heroRect.height) / 2; // true vertical center
+  heroY = (areaRect.height - heroRect.height) / 2; 
   heroEl.style.top = heroY + "px";
 }
 
@@ -52,6 +58,19 @@ function resetGame() {
   cancelAnimationFrame(frameId);
   clearInterval(timerId);
   clearInterval(spawnId);
+  overlay.classList.remove("no-overlay");
+
+  // Stop and rewind video
+  if (bgVideo) {
+    bgVideo.pause();
+    bgVideo.currentTime = 0;
+  }
+
+  score = 0;
+  timeLeft = 60;
+  laserSpeed = baseLaserSpeed;   
+  heroSpeed = baseHeroSpeed;     
+  gameRunning = false;
 
   // Remove any lasers
   lasers.forEach((l) => {
@@ -85,24 +104,45 @@ function startGame() {
   startBtn.disabled = true;
   resetBtn.disabled = false;
   messageEl.textContent = "Dodge the lasers!";
+  overlay.classList.add("no-overlay");
+
+   // Start video from the beginning and play
+   if (bgVideo) {
+    bgVideo.currentTime = 0;   
+    bgVideo.play();           
+  }
 
   // Timer (countdown every second)
   timerId = setInterval(() => {
     if (!gameRunning) return;
+  
     timeLeft -= 1;
     timeEl.textContent = timeLeft;
-
-    // small score for surviving
+  
+    // score for surviving
     score += 1;
     scoreEl.textContent = score;
-
+  
+    // ---------- DIFFICULTY RAMP ----------
+    const elapsed = 60 - timeLeft;                   
+    const difficultyStep = Math.floor(elapsed / 10); 
+  
+    laserSpeed = baseLaserSpeed + difficultyStep * laserSpeedStep;
+    heroSpeed  = baseHeroSpeed  + difficultyStep * heroSpeedStep;
+    spawnRate = Math.max(
+      minSpawnRate,
+      baseSpawnRate - difficultyStep * 150   
+    );
+  
     if (timeLeft <= 0) {
       endGame("time");
     }
   }, 1000);
+  
+  
 
   // Spawn lasers from the ships
-  spawnId = setInterval(spawnLaser, 900); // every 0.9s
+  spawnLoop();
 
   // Start the animation loop
   frameId = requestAnimationFrame(update);
@@ -114,6 +154,11 @@ function endGame(reason) {
   clearInterval(timerId);
   clearInterval(spawnId);
   cancelAnimationFrame(frameId);
+
+  // Pause video on game over
+  if (bgVideo) {
+    bgVideo.pause();
+  }
 
   if (reason === "hit") {
     messageEl.textContent = "You got hit! Final score: " + score + ". Press Reset or Start to try again.";
@@ -161,6 +206,15 @@ function spawnLaser() {
   });
 }
 
+function spawnLoop() {
+  if (!gameRunning) return;
+
+  spawnLaser();              
+
+  spawnId = setTimeout(spawnLoop, spawnRate); 
+}
+
+
 // Main update loop (movement + collision)
 function update() {
   if (!gameRunning) return;
@@ -178,47 +232,36 @@ function update() {
   }
 
   // Clamp hero so they stay fully inside game area
-  const edgeMargin = 10; // pixels of padding from top/bottom
-  heroY = clamp(
-    heroY,
-    edgeMargin,
-    areaRect.height - heroHeight - edgeMargin
-  );
+  const edgeMargin = 10; 
+  heroY = clamp(heroY, edgeMargin, areaRect.height - heroHeight - edgeMargin);
   heroEl.style.top = heroY + "px";
 
-  // ---- Compute hero bounds in LOCAL (game-area) coords ----
+    // ---- Compute hero hitbox bounds in VIEWPORT coords ----
   const hitbox = heroEl.querySelector(".hitbox");
-  const heroTop = hitbox.offsetTop + heroY;
-  const heroBottom = heroTop + hitbox.offsetHeight;
-  const heroLeft = hitbox.offsetLeft + heroEl.offsetLeft;
-  const heroRight = heroLeft + hitbox.offsetWidth;
-
+  const heroRect = hitbox.getBoundingClientRect();
 
   // ---- Update lasers ----
   const newLasers = [];
 
   lasers.forEach((laser) => {
-    // Move left in local coords
+    // Move left in local coords, still using x for layout
     laser.x -= laserSpeed;
     laser.el.style.left = laser.x + "px";
 
-    const laserTop = laser.y;
-    const laserBottom = laser.y + laser.el.offsetHeight;
-    const laserLeft = laser.x;
-    const laserRight = laser.x + laser.el.offsetWidth;
+    // Laser rect in VIEWPORT coords
+    const laserRect = laser.el.getBoundingClientRect();
 
-    // ---- Local AABB collision check ----
+    // ---- AABB collision check in VIEWPORT coords ----
     const overlap = !(
-      laserRight < heroLeft ||
-      laserLeft > heroRight ||
-      laserBottom < heroTop ||
-      laserTop > heroBottom
+      laserRect.right < heroRect.left ||
+      laserRect.left > heroRect.right ||
+      laserRect.bottom < heroRect.top ||
+      laserRect.top > heroRect.bottom
     );
 
     if (overlap) {
-      // Hero hit: play small effect and end game
       heroEl.classList.remove("hit");
-      void heroEl.offsetWidth; // restart animation
+      void heroEl.offsetWidth;
       heroEl.classList.add("hit");
 
       endGame("hit");
@@ -226,12 +269,11 @@ function update() {
       if (laser.el.parentNode) {
         laser.el.parentNode.removeChild(laser.el);
       }
-      return; // don't keep this laser
+      return;
     }
 
-    // ---- Remove lasers that go off the LEFT edge ----
-    if (laserRight < 0) {
-      // Count a successful dodge
+    // Remove lasers that go off the LEFT edge of the game area
+    if (laserRect.right < gameArea.getBoundingClientRect().left) {
       score += 5;
       scoreEl.textContent = score;
 
@@ -244,6 +286,7 @@ function update() {
     newLasers.push(laser);
   });
 
+
   lasers = newLasers;
 
   // Continue loop
@@ -253,46 +296,81 @@ function update() {
 
 // ----- Event listeners -----
 window.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+  // ----- SPACE: start game if not running -----
+  if ((e.code === "Space" || e.key === " ") && !gameRunning) {
+    e.preventDefault();      
+    startGame();
+    return;                  
+  }
+
+  // ----- MOVE UP: ArrowUp or W -----
+  if (
+    e.key === "ArrowUp" ||
+    e.key === "Up" ||
+    e.code === "ArrowUp" ||
+    e.key === "w" ||
+    e.key === "W"
+  ) {
+    e.preventDefault();
     keys.up = true;
   }
-  if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+
+  // ----- MOVE DOWN: ArrowDown or S -----
+  if (
+    e.key === "ArrowDown" ||
+    e.key === "Down" ||       
+    e.code === "ArrowDown" ||
+    e.key === "s" ||
+    e.key === "S"
+  ) {
+    e.preventDefault();
     keys.down = true;
   }
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+  if (
+    e.key === "ArrowUp" ||
+    e.key === "Up" ||
+    e.code === "ArrowUp" ||
+    e.key === "w" ||
+    e.key === "W"
+  ) {
     keys.up = false;
   }
-  if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+
+  if (
+    e.key === "ArrowDown" ||
+    e.key === "Down" ||
+    e.code === "ArrowDown" ||
+    e.key === "s" ||
+    e.key === "S"
+  ) {
     keys.down = false;
   }
 });
 
+
 startBtn.addEventListener("click", () => {
   if (!gameRunning) {
     startGame();
-    overlay.classList.add("no-overlay");  // TURN OFF overlay when game starts
   }
 });
-
 
 resetBtn.addEventListener("click", () => {
   resetGame();
-  overlay.classList.remove("no-overlay");  // TURN ON overlay after reset
 });
 
 
-// Clicking in game area also starts game if stopped
-gameArea.addEventListener("click", () => {
-  if (!gameRunning) {
-    startGame();
-  }
-});
+
 
 // When the page loads, set initial hero position and message
 window.addEventListener("load", () => {
   positionHeroCenter();
   messageEl.textContent = "Press Start, then dodge the lasers!";
+  // Pause video on initial load
+  if (bgVideo) {
+    bgVideo.pause();
+    bgVideo.currentTime = 0;
+  }
 });
